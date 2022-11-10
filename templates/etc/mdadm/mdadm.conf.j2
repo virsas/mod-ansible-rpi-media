@@ -1,0 +1,5 @@
+CREATE owner=root group=disk mode=0660 auto=yes
+HOMEHOST <system>
+MAILADDR root
+# /sbin/mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+ARRAY /dev/md/{{ MDID }} metadata=1.2 name={{ MDNAME }}:{{ MDID }} UUID={{ MDUUID }}

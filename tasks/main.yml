@@ -1,0 +1,7 @@
+---
+
+- include: raid.yml
+- include: apache.yml
+- include: plex.yml
+- include: aria2.yml
+- include: nfs.yml

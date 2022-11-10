@@ -1,0 +1,57 @@
+---
+- name: install packages
+  apt: 
+    name: ['initramfs-tools', 'mdadm']
+    state: present
+    update_cache: yes
+  when: MDENABLED|default(false)|bool == true
+
+- name: Add modules to modprobe
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - raid1
+    - md
+  notify:
+    - mdadm set
+  when: MDENABLED|default(false)|bool == true
+
+- meta: flush_handlers
+
+- name: copy needed files
+  template:
+    src: "{{ item.source }}"
+    dest: "{{ item.destination }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { source: "etc/mdadm/mdadm.conf.j2", destination: "/etc/mdadm/mdadm.conf", mode: "0600" }
+  when: MDENABLED|default(false)|bool == true
+
+- name: add md to load after reboot
+  lineinfile:
+    dest: /etc/modules
+    regexp: "^md$"
+    line: "md"
+  when: MDENABLED|default(false)|bool == true
+
+- name: add raid1 to load after reboot
+  lineinfile:
+    dest: /etc/modules
+    regexp: "^raid1$"
+    line: "raid1"
+  when: MDENABLED|default(false)|bool == true
+
+- name: Creates directory
+  file:
+    path: "{{ MOUNT_POINT }}"
+    state: directory
+
+- name: Mount raid partition
+  mount:
+    name: "{{ MOUNT_POINT }}"
+    src: /dev/md0
+    fstype: ext4
+    opts: defaults
+    state: mounted
+  when: MDENABLED|default(false)|bool == true

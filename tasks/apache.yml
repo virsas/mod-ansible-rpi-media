@@ -1,0 +1,36 @@
+---
+
+- name: install apache packages
+  apt: 
+    name: apache2
+    state: present
+    update_cache: yes
+
+- name: Copy apache2 configuration
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: "etc/apache2/sites-available/000-default.conf.j2", dest: "/etc/apache2/sites-available/000-default.conf", mode: "0644" }
+  notify:
+    - restart apache2
+
+- name: Enable apache reverse proxy modules
+  apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items:
+    - proxy
+    - proxy_http
+    - proxy_balancer
+    - lbmethod_byrequests
+  notify:
+    - restart apache2
+
+- name: enable apache server
+  systemd: 
+    name: apache2
+    enabled: yes
+    state: started
+    daemon_reload: yes

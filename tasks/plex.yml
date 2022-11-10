@@ -1,0 +1,26 @@
+---
+
+- name: add plex apt-key
+  apt_key: 
+    url: https://downloads.plex.tv/plex-keys/PlexSign.key
+    state: present 
+
+- name: add plex apt repository
+  apt_repository: 
+    repo: 'deb https://downloads.plex.tv/repo/deb public main' 
+    state: present 
+    filename: plex 
+    update_cache: yes
+
+- name: install packages
+  apt: 
+    name: ['plexmediaserver']
+    state: present
+    update_cache: yes
+
+- name: enable and start plexmedia server
+  systemd:
+    name: plexmediaserver
+    state: started
+    enabled: yes
+    masked: no

@@ -1,0 +1,30 @@
+---
+# Handlers
+
+- name: mdadm set
+  shell: /sbin/mdadm --assemble --scan
+
+- name: restart exports
+  shell: /usr/sbin/exportfs -ra
+
+- name: restart nfs
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    daemon_reload: yes
+  with_items:
+    - rpcbind
+    - rpc-statd
+    - nfs-kernel-server
+ 
+- name: restart aria2
+  systemd: 
+    name: aria2
+    state: restarted
+    daemon_reload: yes
+
+- name: restart apache2
+  systemd: 
+    name: apache2
+    state: restarted
+    daemon_reload: yes
